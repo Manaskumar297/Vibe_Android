@@ -16,7 +16,16 @@ fun AppNavigation(){
         startDestination = Destination.Splash.route
     ){
         composable(route = Destination.Splash.route){
-            SplashScreen()
+            SplashScreen(
+                onNavigateToLogin = {
+                    navController.navigate(Destination.Login.route){
+                        popUpTo(Destination.Splash.route) {
+                            inclusive=true
+                        }
+                    }
+                },
+                onNavigateToHome = {}
+            )
         }
 
         composable (Destination.Login.route){
