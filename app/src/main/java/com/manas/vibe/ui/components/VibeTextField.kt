@@ -1,18 +1,20 @@
 package com.manas.vibe.ui.components
 
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun VibeTextField (
     value:String,
     onValueChange:(String)-> Unit,
-    placeHolder: String,
-    modifier: Modifier,
+    placeholder: String,
+    modifier: Modifier= Modifier,
     keyboardType: KeyboardType = KeyboardType.Text,
     enable: Boolean=true,
     singleLine: Boolean=true
@@ -22,7 +24,7 @@ fun VibeTextField (
         onValueChange=onValueChange,
         placeholder = {
             Text(
-                text = placeHolder
+                text = placeholder
             )
         },
         keyboardOptions = KeyboardOptions(
@@ -31,5 +33,15 @@ fun VibeTextField (
         enabled = enable,
         singleLine = singleLine,
         modifier = modifier
+    )
+}
+@Preview(showBackground = true)
+@Composable
+private fun VibeTextFieldPreview() {
+    VibeTextField(
+        value = "",
+        onValueChange = {},
+        placeholder = "Phone number",
+        modifier = Modifier
     )
 }
