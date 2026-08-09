@@ -54,4 +54,7 @@ dependencies {
 
 
     implementation(libs.androidx.navigation.compose)
+
+    //for phone number length validation according to the country code
+    implementation(libs.libphonenumber)
 }
