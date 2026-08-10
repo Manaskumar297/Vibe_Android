@@ -7,5 +7,8 @@ data class LoginUiState(
     val selectedCountry: Country= countries.first(),
     val phoneNumber: String="",
     val isLoading: Boolean=false,
-    val errorMessage:String?=null
+    val errorMessage:String?=null,
+    val verificationId: String? = null,
+    val navigateToOtp: Boolean = false
+
 )

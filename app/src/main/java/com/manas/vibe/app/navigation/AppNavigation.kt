@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.manas.vibe.feature.auth.login.presentation.LoginScreen
+import com.manas.vibe.feature.auth.otp.presentation.OtpScreen
 import com.manas.vibe.feature.home.presentation.HomeScreen
 import com.manas.vibe.feature.splash.presentation.SplashScreen
 
@@ -29,7 +30,14 @@ fun AppNavigation(){
         }
 
         composable (Destination.Login.route){
-            LoginScreen()
+            LoginScreen(
+                onNavigateToOtp = {
+                    navController.navigate(Destination.OtpScreen.route)
+                }
+            )
+        }
+        composable (Destination.OtpScreen.route){
+            OtpScreen()
         }
 
         composable (

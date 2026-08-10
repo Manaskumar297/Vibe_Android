@@ -1,4 +1,4 @@
-package com.manas.vibe.feature.auth.login.presentation
+package com.manas.vibe.feature.auth.otp.presentation
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -13,76 +13,54 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.manas.vibe.R
-import com.manas.vibe.ui.components.PhoneNumberField
+import com.manas.vibe.ui.components.OtpTextField
 import com.manas.vibe.ui.components.VibeButton
-import com.manas.vibe.ui.util.findActivity
 
 @Composable
-fun LoginScreen(
-    onNavigateToOtp: () -> Unit,
-    viewModel: LoginViewModel = hiltViewModel()
+fun OtpScreen(
+    viewModel: OtpViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    val context = LocalContext.current
-    val activity = context.findActivity()
-    LaunchedEffect(uiState.navigateToOtp) {
-        if (uiState.navigateToOtp) {
-            onNavigateToOtp()
-
-            // Tell ViewModel that navigation has been consumed
-            viewModel.onEvent(LoginUiEvent.NavigationHandled)
-        }
-    }
-    LoginContent(
+    OtpContent(
         uiState = uiState,
-        onEvent = { event ->
-
-            viewModel.onEvent(event)
-
-            if (event is LoginUiEvent.ContinueClicked) {
-                activity?.let {
-                    viewModel.sendOtp(it)
-                }
-            }
+        onEvent = viewModel::onEvent,
+        onVerify = {
+            // Safe handling if verificationId is available in your UI state
+            viewModel.verifyOtp(uiState.verificationId)
         }
     )
 }
 
 @Composable
-private fun LoginContent(
-    uiState: LoginUiState,
-    onEvent: (LoginUiEvent) -> Unit
+private fun OtpContent(
+    uiState: OtpUiState,
+    onEvent: (OtpUiEvent) -> Unit,
+    onVerify: () -> Unit
 ) {
-    // Outer Box to hold the full-screen background image
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // Background Image with explicit alpha and graphicsLayer
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Background Image with matching opacity effect
         Image(
             painter = painterResource(id = R.drawable.img_background),
             contentDescription = null,
             alpha = 0.5f,
             modifier = Modifier
                 .fillMaxSize()
-                .graphicsLayer(alpha = 0.4f),
+                .graphicsLayer(alpha = 0.5f),
             contentScale = ContentScale.Crop
         )
 
-        // Foreground Content Layout
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -99,7 +77,7 @@ private fun LoginContent(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Welcome to Vibe",
+                text = "Verify your number",
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -107,40 +85,38 @@ private fun LoginContent(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Enter your phone number to continue",
+                text = "Enter the 6-digit code sent to your phone",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            PhoneNumberField(
-                selectedCountry = uiState.selectedCountry,
-                phoneNumber = uiState.phoneNumber,
-
-                onPhoneNumberChange = {
-                    onEvent(
-                        LoginUiEvent.PhoneNumberChanged(it)
-                    )
-                },
-
-                onCountryChange = {
-                    onEvent(
-                        LoginUiEvent.CountryChanged(it)
-                    )
-                },
-
-                modifier = Modifier.fillMaxWidth()
+            // Integrated 6-Digit OTP Field component
+            OtpTextField(
+                otpText = uiState.otp, // Ensure your OtpUiState has an `otpCode` field
+                onOtpTextChange = { code, isComplete ->
+                    onEvent(OtpUiEvent.OtpChanged(code))
+                }
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            uiState.errorMessage?.let { error ->
+                Text(
+                    text = error,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             VibeButton(
-                text = "Continue",
+                text = "Verify",
                 isLoading = uiState.isLoading,
-                onClick = {
-                    onEvent(LoginUiEvent.ContinueClicked)
-                },
+                onClick = onVerify,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -149,9 +125,16 @@ private fun LoginContent(
 
 @Preview(showBackground = true)
 @Composable
-private fun LoginScreenPreview() {
-    LoginContent(
-        uiState = LoginUiState(),
-        onEvent = {}
+private fun OtpScreenPreview() {
+    OtpContent(
+        uiState = OtpUiState(
+            otp = "123456",
+            isLoading = false,
+            errorMessage = null,
+            isVerified = false
+        ),
+        onEvent = {},
+        onVerify = {}
     )
 }
+

@@ -13,4 +13,13 @@ sealed interface LoginUiEvent {
     ) : LoginUiEvent
 
     data object ContinueClicked : LoginUiEvent
+    data class OtpSent(
+        val verificationId: String
+    ) : LoginUiEvent
+
+    data class VerificationFailed(
+        val message: String
+    ) : LoginUiEvent
+
+    data object NavigationHandled : LoginUiEvent
 }
