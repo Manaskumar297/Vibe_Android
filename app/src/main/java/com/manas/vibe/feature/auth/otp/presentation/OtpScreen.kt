@@ -29,6 +29,7 @@ import com.manas.vibe.ui.components.VibeButton
 
 @Composable
 fun OtpScreen(
+    verificationId:String,
     viewModel: OtpViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -38,7 +39,7 @@ fun OtpScreen(
         onEvent = viewModel::onEvent,
         onVerify = {
             // Safe handling if verificationId is available in your UI state
-            viewModel.verifyOtp(uiState.verificationId)
+            viewModel.verifyOtp(verificationId)
         }
     )
 }

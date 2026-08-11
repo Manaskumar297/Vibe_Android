@@ -32,7 +32,7 @@ import com.manas.vibe.ui.util.findActivity
 
 @Composable
 fun LoginScreen(
-    onNavigateToOtp: () -> Unit,
+    onNavigateToOtp: (String) -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -41,7 +41,7 @@ fun LoginScreen(
     val activity = context.findActivity()
     LaunchedEffect(uiState.navigateToOtp) {
         if (uiState.navigateToOtp) {
-            onNavigateToOtp()
+            onNavigateToOtp(uiState.verificationId)
 
             // Tell ViewModel that navigation has been consumed
             viewModel.onEvent(LoginUiEvent.NavigationHandled)

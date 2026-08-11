@@ -10,18 +10,18 @@ import com.manas.vibe.feature.home.presentation.HomeScreen
 import com.manas.vibe.feature.splash.presentation.SplashScreen
 
 @Composable
-fun AppNavigation(){
-    val navController= rememberNavController()
+fun AppNavigation() {
+    val navController = rememberNavController()
     NavHost(
         navController = navController,
         startDestination = Destination.Splash.route
-    ){
-        composable(route = Destination.Splash.route){
+    ) {
+        composable(route = Destination.Splash.route) {
             SplashScreen(
                 onNavigateToLogin = {
-                    navController.navigate(Destination.Login.route){
+                    navController.navigate(Destination.Login.route) {
                         popUpTo(Destination.Splash.route) {
-                            inclusive=true
+                            inclusive = true
                         }
                     }
                 },
@@ -29,20 +29,31 @@ fun AppNavigation(){
             )
         }
 
-        composable (Destination.Login.route){
+        composable(Destination.Login.route) {
             LoginScreen(
-                onNavigateToOtp = {
+                onNavigateToOtp = { verificationId ->
+                    navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("verificationId", verificationId)
+
                     navController.navigate(Destination.OtpScreen.route)
                 }
             )
         }
-        composable (Destination.OtpScreen.route){
-            OtpScreen()
+        composable(Destination.OtpScreen.route) {
+            val verificationId =
+                navController.previousBackStackEntry
+                    ?.savedStateHandle
+                    ?.get<String>("verificationId")
+                    ?: ""
+            OtpScreen(
+                verificationId =verificationId
+            )
         }
 
-        composable (
-            route= Destination.Home.route
-        ){
+        composable(
+            route = Destination.Home.route
+        ) {
             HomeScreen()
         }
     }
