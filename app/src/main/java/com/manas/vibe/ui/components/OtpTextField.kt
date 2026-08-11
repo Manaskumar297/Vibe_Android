@@ -8,8 +8,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,6 +29,9 @@ fun OtpTextField(
     modifier: Modifier = Modifier,
     length: Int = 6
 ) {
+    // Create focus requesters for each individual box
+    val focusRequesters = remember { List(length) { FocusRequester() } }
+
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -39,17 +48,25 @@ fun OtpTextField(
                 onValueChange = { value ->
                     if (value.length <= 1) {
                         val currentText = StringBuilder(otpText)
-                        if (i < currentText.length) {
-                            if (value.isNotEmpty()) {
+
+                        if (value.isNotEmpty()) {
+                            // Typing a character
+                            if (i < currentText.length) {
                                 currentText[i] = value[0]
                             } else {
-                                currentText.deleteCharAt(i)
-                            }
-                        } else {
-                            if (value.isNotEmpty()) {
                                 currentText.append(value[0])
                             }
+                            // Move focus to next box if available
+                            if (i < length - 1) {
+                                focusRequesters[i + 1].requestFocus()
+                            }
+                        } else {
+                            // Clearing text in the current box
+                            if (i < currentText.length) {
+                                currentText.deleteCharAt(i)
+                            }
                         }
+
                         onOtpTextChange(currentText.toString(), currentText.length == length)
                     }
                 },
@@ -63,6 +80,16 @@ fun OtpTextField(
                 modifier = Modifier
                     .width(48.dp)
                     .height(56.dp)
+                    .focusRequester(focusRequesters[i])
+                    .onKeyEvent { keyEvent ->
+                        // Handle backspace when current box is empty to move backward
+                        if (keyEvent.key == Key.Backspace && char.isEmpty() && i > 0) {
+                            focusRequesters[i - 1].requestFocus()
+                            true
+                        } else {
+                            false
+                        }
+                    }
             )
         }
     }
@@ -94,4 +121,3 @@ private fun OtpTextFieldEmptyPreview() {
         onOtpTextChange = { _, _ -> }
     )
 }
-
