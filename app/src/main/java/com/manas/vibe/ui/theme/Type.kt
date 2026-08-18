@@ -22,8 +22,8 @@ val Typography = Typography(
     headlineLarge = TextStyle(
         fontFamily = Poppins,
         fontWeight = FontWeight.Bold,
-        fontSize = 32.sp,
-        lineHeight = 40.sp
+        fontSize = 30.sp,
+        lineHeight = 36.sp
     ),
 
     titleLarge = TextStyle(
@@ -36,8 +36,8 @@ val Typography = Typography(
     bodyLarge = TextStyle(
         fontFamily = Poppins,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp
+        fontSize = 18.sp,
+        lineHeight = 28.sp
     ),
 
     bodyMedium = TextStyle(
