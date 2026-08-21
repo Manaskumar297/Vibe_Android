@@ -1,26 +1,30 @@
 package com.manas.vibe.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.manas.vibe.R
 
 @Composable
 fun OtpTextField(
@@ -29,95 +33,75 @@ fun OtpTextField(
     modifier: Modifier = Modifier,
     length: Int = 6
 ) {
-    // Create focus requesters for each individual box
-    val focusRequesters = remember { List(length) { FocusRequester() } }
-
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        for (i in 0 until length) {
-            val char = when {
-                i < otpText.length -> otpText[i].toString()
-                else -> ""
+    BasicTextField(
+        value = otpText,
+        onValueChange = {
+            if (it.length <= length && it.all { char -> char.isDigit() }) {
+                onOtpTextChange(it, it.length == length)
             }
+        },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        modifier = modifier.fillMaxWidth(),
+        cursorBrush = SolidColor(Color.Transparent),
+        textStyle = TextStyle(color = Color.Transparent),
+        decorationBox = { innerTextField ->
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                innerTextField()
 
-            OutlinedTextField(
-                value = char,
-                onValueChange = { value ->
-                    if (value.length <= 1) {
-                        val currentText = StringBuilder(otpText)
-
-                        if (value.isNotEmpty()) {
-                            // Typing a character
-                            if (i < currentText.length) {
-                                currentText[i] = value[0]
-                            } else {
-                                currentText.append(value[0])
-                            }
-                            // Move focus to next box if available
-                            if (i < length - 1) {
-                                focusRequesters[i + 1].requestFocus()
-                            }
-                        } else {
-                            // Clearing text in the current box
-                            if (i < currentText.length) {
-                                currentText.deleteCharAt(i)
-                            }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    repeat(length) { index ->
+                        val char = when {
+                            index < otpText.length -> otpText[index].toString()
+                            else -> ""
                         }
-
-                        onOtpTextChange(currentText.toString(), currentText.length == length)
+                        OtpBox(char = char)
                     }
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                textStyle = androidx.compose.ui.text.TextStyle(
-                    textAlign = TextAlign.Center,
-                    fontSize = 18.sp
-                ),
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun OtpBox(char: String) {
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(colorResource(R.color.FFFFFF)),
+        contentAlignment = Alignment.Center
+    ) {
+        if (char.isEmpty()) {
+            Box(
                 modifier = Modifier
-                    .width(48.dp)
-                    .height(56.dp)
-                    .focusRequester(focusRequesters[i])
-                    .onKeyEvent { keyEvent ->
-                        // Handle backspace when current box is empty to move backward
-                        if (keyEvent.key == Key.Backspace && char.isEmpty() && i > 0) {
-                            focusRequesters[i - 1].requestFocus()
-                            true
-                        } else {
-                            false
-                        }
-                    }
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF9E9E9E)) // Neutral grey dot
+            )
+        } else {
+            Text(
+                text = char,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    color = colorResource(R.color._1E3C72)
+                )
             )
         }
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, backgroundColor = 0xFFC1D2FF)
 @Composable
 private fun OtpTextFieldPreview() {
     OtpTextField(
-        otpText = "123",
-        onOtpTextChange = { _, _ -> }
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun OtpTextFieldCompletePreview() {
-    OtpTextField(
-        otpText = "123456",
-        onOtpTextChange = { _, _ -> }
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun OtpTextFieldEmptyPreview() {
-    OtpTextField(
-        otpText = "",
+        otpText = "48",
         onOtpTextChange = { _, _ -> }
     )
 }

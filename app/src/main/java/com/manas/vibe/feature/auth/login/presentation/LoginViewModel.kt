@@ -44,7 +44,7 @@ class LoginViewModel @Inject constructor(
             }
 
             LoginUiEvent.ContinueClicked -> {
-
+                Log.d("LoginViewModel", "ContinueClicked")
                 val state = _uiState.value
 
                 val isValid = phoneNumberValidator.validate(
@@ -53,7 +53,7 @@ class LoginViewModel @Inject constructor(
                 )
 
                 if (!isValid) {
-
+                    Log.w("LoginViewModel", "Invalid phone number: ${state.phoneNumber}")
                     _uiState.update {
                         it.copy(
                             errorMessage = "Please enter a valid phone number."
@@ -61,9 +61,10 @@ class LoginViewModel @Inject constructor(
                     }
 
                 } else {
-
-
-                    // OTP logic will come here
+                    Log.d("LoginViewModel", "Phone number is valid")
+                    _uiState.update { it.copy(errorMessage = null) }
+                    // Triggering sendOtp is now handled by the UI check, 
+                    // but we clear the error first.
                 }
             }
 
@@ -101,8 +102,16 @@ class LoginViewModel @Inject constructor(
 
         val state = _uiState.value
 
-        val phoneNumber =
-            state.selectedCountry.dialCode + state.phoneNumber
+        // Double check validation before hitting Firebase
+        val isValid = phoneNumberValidator.validate(
+            phoneNumber = state.phoneNumber,
+            regionCode = state.selectedCountry.isoCode
+        )
+
+        if (!isValid) return
+
+        val phoneNumber = state.selectedCountry.dialCode + state.phoneNumber
+        Log.d("LoginViewModel", "sendOtp called for: $phoneNumber")
 
         _uiState.update {
             it.copy(
@@ -116,16 +125,18 @@ class LoginViewModel @Inject constructor(
             activity = activity,
 
             onCodeSent = { verificationId ->
+                Log.d("LoginViewModel", "onCodeSent: $verificationId")
                 onEvent(
                     LoginUiEvent.OtpSent(verificationId)
                 )
             },
 
             onVerificationCompleted = {
-                // We'll handle automatic verification next
+                Log.d("LoginViewModel", "onVerificationCompleted")
             },
 
             onVerificationFailed = { exception ->
+                Log.e("LoginViewModel", "onVerificationFailed", exception)
                 onEvent(
                     LoginUiEvent.VerificationFailed(
                         exception.message ?: "Failed to send OTP"

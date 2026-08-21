@@ -20,9 +20,9 @@ class FirebaseAuthDataSource @Inject constructor() {
     fun sendOtp(
         phoneNumber: String,
         activity: Activity,
-        onCodeSent: (verificationId: String) -> Unit,
-        onVerificationCompleted: (PhoneAuthCredential) -> Unit,
-        onVerificationFailed: (Exception) -> Unit
+        onSuccess: (verificationId: String) -> Unit,
+        onAutoVerify: (PhoneAuthCredential) -> Unit,
+        onFailed: (Exception) -> Unit
     ) {
 
         val options = PhoneAuthOptions.newBuilder(firebaseAuth)
@@ -35,20 +35,20 @@ class FirebaseAuthDataSource @Inject constructor() {
                     override fun onVerificationCompleted(
                         credential: PhoneAuthCredential
                     ) {
-                        onVerificationCompleted(credential)
+                        onAutoVerify(credential)
                     }
 
                     override fun onVerificationFailed(
                         exception: com.google.firebase.FirebaseException
                     ) {
-                        onVerificationFailed(exception)
+                        onFailed(exception)
                     }
 
                     override fun onCodeSent(
                         verificationId: String,
                         token: PhoneAuthProvider.ForceResendingToken
                     ) {
-                        onCodeSent(verificationId)
+                        onSuccess(verificationId)
                     }
                 }
             )

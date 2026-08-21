@@ -1,5 +1,6 @@
 package com.manas.vibe.feature.auth.otp.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.manas.vibe.feature.auth.login.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,9 +36,14 @@ class OtpViewModel @Inject constructor(
     }
 
     fun verifyOtp(verificationId: String) {
+        Log.d("OtpViewModel", "verifyOtp called with id: $verificationId")
         val otp = _uiState.value.otp
         if (otp.length != 6) {
             _uiState.update { it.copy(errorMessage = "Please enter a valid 6-digit OTP.") }
+            return
+        }
+        if (verificationId.isEmpty()) {
+            _uiState.update { it.copy(errorMessage = "Verification ID is missing. Please try again.") }
             return
         }
         _uiState.update {
@@ -48,6 +54,7 @@ class OtpViewModel @Inject constructor(
         }
         authRepository.verifyOtp(
             verificationId = verificationId, otp = otp, onSuccess = {
+                Log.d("OtpViewModel", "verifyOtp success")
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -57,6 +64,7 @@ class OtpViewModel @Inject constructor(
                 }
             },
             onFailure = { exception ->
+                Log.e("OtpViewModel", "verifyOtp failure", exception)
                 _uiState.update {
                     it.copy(
                         isLoading = false,

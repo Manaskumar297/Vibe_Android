@@ -47,7 +47,14 @@ fun AppNavigation() {
                     ?.get<String>("verificationId")
                     ?: ""
             OtpScreen(
-                verificationId =verificationId
+                verificationId = verificationId,
+                onNavigateToHome = {
+                    navController.navigate(Destination.Home.route) {
+                        popUpTo(Destination.Login.route) {
+                            inclusive = true
+                        }
+                    }
+                }
             )
         }
 

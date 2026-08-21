@@ -25,9 +25,9 @@ class AuthRepositoryImpl @Inject constructor(
         firebaseAuthDataSource.sendOtp(
             phoneNumber = phoneNumber,
             activity = activity,
-            onCodeSent = onCodeSent,
-            onVerificationCompleted = onVerificationCompleted,
-            onVerificationFailed = onVerificationFailed
+            onSuccess = onCodeSent,
+            onAutoVerify = onVerificationCompleted,
+            onFailed = onVerificationFailed
         )
     }
     override fun verifyOtp(
