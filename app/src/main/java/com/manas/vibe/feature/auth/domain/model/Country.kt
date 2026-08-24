@@ -1,4 +1,4 @@
-package com.manas.vibe.feature.auth.login.domain.model
+package com.manas.vibe.feature.auth.domain.model
 
 data class Country(
     val name: String,

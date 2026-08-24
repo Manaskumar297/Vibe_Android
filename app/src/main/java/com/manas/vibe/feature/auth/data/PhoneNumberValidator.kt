@@ -1,4 +1,4 @@
-package com.manas.vibe.feature.auth.login.data
+package com.manas.vibe.feature.auth.data
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 

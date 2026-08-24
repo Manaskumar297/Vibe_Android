@@ -1,10 +1,8 @@
 package com.manas.vibe.feature.auth.login.presentation
 
-import android.app.Activity
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.manas.vibe.feature.auth.login.data.PhoneNumberValidator
-import com.manas.vibe.feature.auth.login.domain.repository.AuthRepository
+import com.manas.vibe.feature.auth.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,31 +11,18 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private  val authRepository: AuthRepository
-)  : ViewModel() {
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val phoneNumberValidator = PhoneNumberValidator()
-
     fun onEvent(event: LoginUiEvent) {
-
         when (event) {
-
-            is LoginUiEvent.PhoneNumberChanged -> {
+            is LoginUiEvent.EmailChanged -> {
                 _uiState.update {
                     it.copy(
-                        phoneNumber = event.phoneNumber,
-                        errorMessage = null
-                    )
-                }
-            }
-
-            is LoginUiEvent.CountryChanged -> {
-                _uiState.update {
-                    it.copy(
-                        selectedCountry = event.country,
+                        email = event.email,
                         errorMessage = null
                     )
                 }
@@ -46,73 +31,29 @@ class LoginViewModel @Inject constructor(
             LoginUiEvent.ContinueClicked -> {
                 Log.d("LoginViewModel", "ContinueClicked")
                 val state = _uiState.value
+                val isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(state.email).matches()
 
-                val isValid = phoneNumberValidator.validate(
-                    phoneNumber = state.phoneNumber,
-                    regionCode = state.selectedCountry.isoCode
-                )
-
-                if (!isValid) {
-                    Log.w("LoginViewModel", "Invalid phone number: ${state.phoneNumber}")
+                if (!isEmailValid) {
                     _uiState.update {
-                        it.copy(
-                            errorMessage = "Please enter a valid phone number."
-                        )
+                        it.copy(errorMessage = "Please enter a valid email address.")
                     }
-
                 } else {
-                    Log.d("LoginViewModel", "Phone number is valid")
                     _uiState.update { it.copy(errorMessage = null) }
-                    // Triggering sendOtp is now handled by the UI check, 
-                    // but we clear the error first.
+                    loginWithEmail(state.email)
                 }
             }
 
-            is LoginUiEvent.OtpSent -> {
-                Log.d(
-                    "LoginViewModel",
-                    "OTP sent. Verification ID received."
-                )
-                _uiState.update {
-                    it.copy(
-                        verificationId  = event.verificationId,
-                        isLoading = false,
-                        errorMessage = null,
-                        navigateToOtp=true
-                    )
-                }
-            }
-
-            is LoginUiEvent.VerificationFailed -> {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        errorMessage = event.message
-                    )
-                }
-            }
             is LoginUiEvent.NavigationHandled -> {
                 _uiState.update {
                     it.copy(navigateToOtp = false)
                 }
             }
+
+            else -> {}
         }
     }
-    fun sendOtp(activity: Activity) {
 
-        val state = _uiState.value
-
-        // Double check validation before hitting Firebase
-        val isValid = phoneNumberValidator.validate(
-            phoneNumber = state.phoneNumber,
-            regionCode = state.selectedCountry.isoCode
-        )
-
-        if (!isValid) return
-
-        val phoneNumber = state.selectedCountry.dialCode + state.phoneNumber
-        Log.d("LoginViewModel", "sendOtp called for: $phoneNumber")
-
+    private fun loginWithEmail(email: String) {
         _uiState.update {
             it.copy(
                 isLoading = true,
@@ -120,28 +61,27 @@ class LoginViewModel @Inject constructor(
             )
         }
 
-        authRepository.sendOtp(
-            phoneNumber = phoneNumber,
-            activity = activity,
-
-            onCodeSent = { verificationId ->
-                Log.d("LoginViewModel", "onCodeSent: $verificationId")
-                onEvent(
-                    LoginUiEvent.OtpSent(verificationId)
-                )
-            },
-
-            onVerificationCompleted = {
-                Log.d("LoginViewModel", "onVerificationCompleted")
-            },
-
-            onVerificationFailed = { exception ->
-                Log.e("LoginViewModel", "onVerificationFailed", exception)
-                onEvent(
-                    LoginUiEvent.VerificationFailed(
-                        exception.message ?: "Failed to send OTP"
+        authRepository.loginWithEmail(
+            email = email,
+            onSuccess = { token ->
+                Log.d("LoginViewModel", "Login success: $token")
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = null,
+                        navigateToOtp = true,
+                        verificationId = token
                     )
-                )
+                }
+            },
+            onFailure = { exception ->
+                Log.e("LoginViewModel", "Login failed", exception)
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = exception.message ?: "Failed to log in"
+                    )
+                }
             }
         )
     }

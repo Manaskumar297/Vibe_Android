@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.google.services)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
 
@@ -24,11 +23,38 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildTypes{
+        debug {
+
+            buildConfigField(
+                "String",
+                "BASE_URl",
+                project.findProperty("DEV_BASE_URL")as String? ?: ""
+            )
+            buildConfigField(
+                "String",
+                "SOCKET_URL",
+                project.findProperty("SOCKET_URL") as String ? ?: ""
+            )
+
+        }
+    }
+
     buildTypes {
         release {
             optimization {
                 enable = false
             }
+            buildConfigField(
+                "String",
+                "BASE_URl",
+                project.findProperty("PROD_BASE_URL")as String? ?: ""
+            )
+            buildConfigField(
+                "String",
+                "SOCKET_URL",
+                project.findProperty("SOCKET_URL") as String ? ?: ""
+            )
         }
     }
     compileOptions {
@@ -37,6 +63,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -63,13 +90,17 @@ dependencies {
     //for phone number length validation according to the country code
     implementation(libs.libphonenumber)
 
-    // Firebase
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth)
-
 
 // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
+
+
+////Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
 }

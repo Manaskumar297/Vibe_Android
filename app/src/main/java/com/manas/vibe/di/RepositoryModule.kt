@@ -1,7 +1,7 @@
 package com.manas.vibe.di
 
-import com.manas.vibe.feature.auth.login.data.repository.AuthRepositoryImpl
-import com.manas.vibe.feature.auth.login.domain.repository.AuthRepository
+import com.manas.vibe.feature.auth.data.repository.AuthRepositoryImpl
+import com.manas.vibe.feature.auth.domain.repository.AuthRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

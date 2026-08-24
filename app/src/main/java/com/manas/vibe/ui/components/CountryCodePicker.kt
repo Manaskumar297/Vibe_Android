@@ -16,8 +16,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.manas.vibe.feature.auth.login.data.countries
-import com.manas.vibe.feature.auth.login.domain.model.Country
+import com.manas.vibe.feature.auth.data.countries
+import com.manas.vibe.feature.auth.domain.model.Country
 
 @Composable
 fun CountryCodePicker(

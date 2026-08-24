@@ -1,11 +1,15 @@
 package com.manas.vibe.feature.auth.login.presentation
 
-import com.manas.vibe.feature.auth.login.domain.model.Country
+import com.manas.vibe.feature.auth.domain.model.Country
 
 sealed interface LoginUiEvent {
 
     data class PhoneNumberChanged(
         val phoneNumber: String
+    ) : LoginUiEvent
+
+    data class EmailChanged(
+        val email: String
     ) : LoginUiEvent
 
     data class CountryChanged(

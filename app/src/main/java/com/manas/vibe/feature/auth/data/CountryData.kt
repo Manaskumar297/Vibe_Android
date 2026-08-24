@@ -1,6 +1,6 @@
-package com.manas.vibe.feature.auth.login.data
+package com.manas.vibe.feature.auth.data
 
-import com.manas.vibe.feature.auth.login.domain.model.Country
+import com.manas.vibe.feature.auth.domain.model.Country
 
 val countries = listOf(
     Country(

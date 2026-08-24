@@ -2,7 +2,7 @@ package com.manas.vibe.feature.auth.otp.presentation
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.manas.vibe.feature.auth.login.domain.repository.AuthRepository
+import com.manas.vibe.feature.auth.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -53,8 +53,8 @@ class OtpViewModel @Inject constructor(
             )
         }
         authRepository.verifyOtp(
-            verificationId = verificationId, otp = otp, onSuccess = {
-                Log.d("OtpViewModel", "verifyOtp success")
+            verificationId = verificationId, otp = otp, onSuccess = { user ->
+                Log.d("OtpViewModel", "verifyOtp success for user: ${user.id}")
                 _uiState.update {
                     it.copy(
                         isLoading = false,
